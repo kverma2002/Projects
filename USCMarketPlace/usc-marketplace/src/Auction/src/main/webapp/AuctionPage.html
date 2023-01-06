@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Live Auction</title>
+        <script>
+			var socket;
+			var countDownDate = new Date("Dec 1, 2022 21:17:25").getTime();
+			var x = setInterval(function() {
+
+				  // Get today's date and time
+				  var now = new Date().getTime();
+
+				  // Find the distance between now and the count down date
+				  var distance = countDownDate - now;
+
+				  // Time calculations for days, hours, minutes and seconds
+				  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+				  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+				  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+				  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+				  // Display the result in the element with id="demo"
+				  document.getElementById("timer").innerHTML = "Auction ends in: "+days + "d " + hours + "h "
+				  + minutes + "m " + seconds + "s ";
+
+				  // If the count down is finished, write some text
+				  if (distance < 0) {
+				    clearInterval(x);
+				    var form = document.getElementById("bidForm");
+				    var elements = form.elements;
+				    for (var i = 0, len = elements.length; i < len; ++i) {
+				        elements[i].readOnly = true;
+				    }
+				    socket.send("End");
+				  }
+				}, 1000);
+			function connectToServer() {
+				socket = new WebSocket("ws://localhost:9080/Auction/ws");
+				socket.onopen = function(event) {
+					document.getElementById("status").innerHTML += "Connected!<br />";
+				}
+				socket.onmessage = function(event) {
+					const returnString = event.data;
+					const failString = "Fail";
+					const currentBid = "currentBid";
+					const bidder = "bidder";
+					const newBid = "newBid";
+					const end = "End";
+					const inputs = returnString.split("/");
+					const compare = returnString.localeCompare(failString);
+					if(inputs[0].localeCompare(newBid)==0){
+						document.getElementById("highest").innerHTML = "Highest Bid: $"+inputs[1];
+						alert("New Highest Bid = $"+inputs[1]);
+					}
+					else if(inputs[0].localeCompare(failString)==0){
+						alert("Bid unsucessful!");
+					}
+					else if(inputs[0].localeCompare(currentBid)==0){
+						document.getElementById("highest").innerHTML = "Highest Bid: $"+inputs[1];
+					}
+					else if(inputs[0].localeCompare(bidder)==0){
+						document.getElementById("bidder").innerHTML = "Curent Live Bidder: "+inputs[1];
+					}
+					else if(inputs[0].localeCompare(end)==0){
+						document.getElementById("timer").innerHTML = "Auction Winner is : "+inputs[1];
+					}
+				}
+				socket.onclose = function(event) {
+					document.getElementById("status").innerHTML += "Disconnected!<br />";
+				}
+			}
+			function sendMessage() {
+				if(validateBid())
+				{
+					if(validateEmail()){
+						socket.send("newBid/"+document.getElementById("bid").value+"/"+document.getElementById("email").value);
+						document.getElementById("bidForm").reset();		
+					}
+				}
+				return false;
+			}
+			function validateEmail()
+			{
+				//source code: https://www.w3resource.com/javascript/form/email-validation.php
+				var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+				if(!document.getElementById("email").value.match(mailformat))
+				{
+					alert("Invalid email address!");
+					document.signup.email.value = '';
+					return false;
+				}
+				return true;
+			}
+			function validateBid(){
+				var bid = document.getElementById("bid").value;
+				if(bid<=0 || bid==null){
+					alert("Invalid bid amount!");
+					return false;
+				}
+				return true;
+			}
+		</script>
+        <style>
+        	body{
+        	 background-color: rgb(99, 7, 7);
+        	 color: white;
+        	}
+        	#page{
+        		display:flex;
+        		flex-direction:column;
+        	}
+        	#header{
+        		background-color:rgb(194,163,3);
+        		color:white;
+        		height:30px;
+        		text-align:center;
+        		line-height:0px;
+        	}
+            #main{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            #ItemPic{
+                width: 500px;
+                height: auto;
+            }
+            #bidDiv{
+                display: flex;
+                flex-direction: column;
+                border-radius: 20px;
+            }
+            #info{
+            	background-color:rgb(194,163,3);
+            	width: 500px;
+            	height:auto;
+            	display:flex;
+            	flex-direction:column;
+            	align-items: center;
+            	margin-top: 30px;
+            	border-radius: 20px;
+            }
+            input{
+            	margin:5px 0px 5px 0px;
+            }
+        </style>
+    </head>
+    <body onload="connectToServer()">
+    <div id="page">
+    	<div id="header">
+    		<p id="timer"></p>
+    	</div>
+        <div id="main">
+            <h1 id="itemTitle">Air Jordan 1 Retro</h1>
+            <img id="ItemPic" src="aj.jpeg" alt="aj">
+            <div id="info">
+            <h4>Item Description: Size 11</h4>
+            <h4 id="highest">Highest Bid: </h4>
+            <p id="bidder">Current Live Bidder: </p>
+            <form action="Post" id="bidForm">
+                <div id="bidDiv">
+                    Enter Your Bid ($): <input id="bid" type="text" name="bid" required/>
+                    Email: <input type="email" id="email" name="email" value = "" required/>
+                    <Input type="button" value="Submit" onclick="sendMessage();"/>
+                </div>
+            </form>
+            </div>
+        </div>
+       </div>
+    </body>
+</html>

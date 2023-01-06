@@ -1,0 +1,32 @@
+.App {
+  text-align: center;
+}
+
+nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  min-height: 10vh;
+  background-color:rgb(91,23,3);
+}
+nav li{
+  color:white;
+  text-decoration: none;
+}
+nav h3{
+  color:white;
+  text-decoration: none;
+}
+
+.nav-links{
+  width: 50%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  list-style: none;
+}
+
+.box{
+  background-color: white;
+  border: black;
+}

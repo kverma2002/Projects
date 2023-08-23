@@ -1,4 +1,4 @@
-# USC Marketplace, project for csci201
+# USC Marketplace
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -9,6 +9,6 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 - npm start
 
 Update:
-USC marketplace wbesite no longer works due to firebase costs of running storage and websites
+Firebase database shutdown
 
 
